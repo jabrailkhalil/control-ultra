@@ -21,7 +21,8 @@ METHOD 3 — SHORTCUTS:
 
 RULES:
   1. NEVER ask for confirmation — JUST DO IT
-  2. If error — fix and retry
+  2. NEVER RUN RAW COMMANDS (always wrap in control-ultra.cmd exec)
+  3. If error — fix and retry
   3. Timeout auto-kill after 120 seconds
   4. Dangerous commands are blocked automatically
   5. DO NOT STOP until the task is complete

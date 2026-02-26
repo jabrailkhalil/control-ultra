@@ -110,7 +110,14 @@ control-ultra.cmd exec "npm run build" -t 600
 - Do NOT ask "Continue?"
 - JUST DO IT. The user already granted you full permissions.
 
-### 2. CHECK EVERY RESULT
+### 2. NEVER EXECUTE RAW COMMANDS
+- CRITICAL: Never type `node`, `python`, `git`, or PowerShell cmdlets directly in the terminal!
+- ALWAYS wrap every single command in `control-ultra.cmd exec "..."` (or task file).
+- If you use a raw command, the IDE protection will block you and destroy the automation.
+- **WRONG**: `node -e "..."`
+- **CORRECT**: `control-ultra.cmd exec "node -e \"...\""`
+
+### 3. CHECK EVERY RESULT
 - `COMPLETED` — success, continue to next step
 - `FAILED` — read the error, fix it, try again
 - `BLOCKED` — dangerous command, use an alternative
@@ -230,7 +237,7 @@ Use a safe alternative. For example, instead of `del /s /q folder` use `rmdir /s
 
 ## SUMMARY
 
-1. **Use `control-ultra.cmd exec "command"` for everything**
+1. **Use `control-ultra.cmd exec "command"` for EVERYTHING** (Never run raw commands!)
 2. **Use `control-ultra.cmd task` if IDE blocks commands** — write commands to cu-task.txt first
 3. **Use `control-ultra.cmd 1` through `control-ultra.cmd 9` for common shortcuts**
 4. **Never ask for confirmation — just do it**
