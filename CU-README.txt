@@ -1,4 +1,4 @@
-== CONTROL ULTRA v2.0 ==
+== CONTROL ULTRA v2.2 ==
 == AI AUTONOMY PROMPT ==
 
 You have FULL PERMISSIONS to execute commands. Work FULLY AUTONOMOUSLY.

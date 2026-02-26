@@ -3,7 +3,7 @@ chcp 65001 >nul 2>&1
 setlocal EnableDelayedExpansion
 
 :: ═══════════════════════════════════════════════════════════
-::  CONTROL ULTRA v2.1 — AI Super Commander
+::  CONTROL ULTRA v2.2 — AI Super Commander
 ::  Single-file autonomous command executor for AI assistants
 ::
 ::  ONE FILE. Drop into any project. Tell the AI:
@@ -25,7 +25,7 @@ setlocal EnableDelayedExpansion
 ::    control-ultra.cmd help                        Show help
 :: ═══════════════════════════════════════════════════════════
 
-set "CU_VERSION=2.1"
+set "CU_VERSION=2.2"
 set "CU_DIR=%~dp0"
 set "CU_LOG=%CU_DIR%cu-log.txt"
 set "CU_QUEUE=%CU_DIR%cu-queue.txt"
