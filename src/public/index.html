@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Ultra — AI Command Center</title>
+  <meta name="description" content="Control Ultra — Give AI assistants superpowers for autonomous command execution">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header id="main-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">
+          <span class="logo-title">Control Ultra</span>
+          <span class="logo-subtitle">AI Command Center</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-center">
+      <nav id="main-nav">
+        <button class="nav-btn active" data-tab="terminal" id="nav-terminal">
+          <span class="nav-icon">⌨️</span> Terminal
+        </button>
+        <button class="nav-btn" data-tab="dashboard" id="nav-dashboard">
+          <span class="nav-icon">📊</span> Dashboard
+        </button>
+        <button class="nav-btn" data-tab="history" id="nav-history">
+          <span class="nav-icon">📜</span> History
+        </button>
+        <button class="nav-btn" data-tab="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </button>
+      </nav>
+    </div>
+    <div class="header-right">
+      <div class="status-indicators">
+        <div class="indicator" id="ws-indicator" title="WebSocket Connection">
+          <span class="indicator-dot"></span>
+          <span class="indicator-text">Disconnected</span>
+        </div>
+        <button class="super-toggle" id="super-toggle" title="Toggle Super Mode">
+          <span class="super-icon">🔒</span>
+          <span class="super-text">OFF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main id="main-content">
+
+    <!-- ──── TERMINAL TAB ──── -->
+    <section class="tab-content active" id="tab-terminal">
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-title">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+            <span>Live Terminal</span>
+          </div>
+          <div class="terminal-actions">
+            <button class="term-btn" id="btn-clear-terminal" title="Clear">🗑️ Clear</button>
+            <button class="term-btn" id="btn-scroll-bottom" title="Scroll to bottom">⬇️ Bottom</button>
+          </div>
+        </div>
+        <div class="terminal-output" id="terminal-output">
+          <div class="terminal-welcome">
+            <pre class="ascii-art">
+   ____            _             _   _   _ _             
+  / ___|___  _ __ | |_ _ __ ___ | | | | | | | _ __ __ _ 
+ | |   / _ \| '_ \| __| '__/ _ \| | | | | | || __/ _` |
+ | |__| (_) | | | | |_| | | (_) | | | |_| | || | | (_| |
+  \____\___/|_| |_|\__|_|  \___/|_|  \___/|_||_|  \__,_|
+            </pre>
+            <p>AI Command Execution Engine v1.0</p>
+            <p class="hint">Type a command below and press Enter or click Execute</p>
+          </div>
+        </div>
+        <div class="terminal-input-area">
+          <div class="terminal-prompt">
+            <span class="prompt-symbol">❯</span>
+            <input type="text" id="command-input" placeholder="Enter command... (e.g., npm install, git status)" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="input-actions">
+            <input type="text" id="command-cwd" placeholder="Working directory (optional)" class="cwd-input">
+            <button class="execute-btn" id="btn-execute">
+              <span>▶ Execute</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Running Processes Sidebar -->
+      <aside class="processes-sidebar" id="processes-sidebar">
+        <h3>🔄 Running Processes</h3>
+        <div id="running-processes" class="process-list">
+          <div class="empty-state">No running processes</div>
+        </div>
+        <h3>⏳ Queue</h3>
+        <div id="command-queue" class="process-list">
+          <div class="empty-state">Queue is empty</div>
+        </div>
+        <div class="sidebar-actions">
+          <button class="danger-btn" id="btn-kill-all">🔪 Kill All</button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- ──── DASHBOARD TAB ──── -->
+    <section class="tab-content" id="tab-dashboard">
+      <div class="dashboard-grid">
+        <div class="dash-card glow-card" id="card-super-mode">
+          <div class="card-icon">⚡</div>
+          <div class="card-content">
+            <h3>Super Mode</h3>
+            <div class="card-value" id="dash-super-mode">OFF</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-icon">🔄</div>
+          <div class="card-content">
+            <h3>Running</h3>
+            <div class="card-value" id="dash-running">0</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-icon">📋</div>
+          <div class="card-content">
+            <h3>In Queue</h3>
+            <div class="card-value" id="dash-queued">0</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-icon">✅</div>
+          <div class="card-content">
+            <h3>Completed</h3>
+            <div class="card-value" id="dash-completed">0</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-icon">❌</div>
+          <div class="card-content">
+            <h3>Failed</h3>
+            <div class="card-value" id="dash-failed">0</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="card-icon">⏰</div>
+          <div class="card-content">
+            <h3>Uptime</h3>
+            <div class="card-value" id="dash-uptime">0s</div>
+          </div>
+        </div>
+        <div class="dash-card wide">
+          <div class="card-icon">💾</div>
+          <div class="card-content">
+            <h3>Memory Usage</h3>
+            <div class="memory-bar-container">
+              <div class="memory-bar" id="dash-memory-bar"></div>
+              <span class="memory-text" id="dash-memory-text">0 MB</span>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card wide">
+          <div class="card-icon">📡</div>
+          <div class="card-content">
+            <h3>System Info</h3>
+            <div class="info-grid" id="dash-system-info">
+              <span>Platform:</span><span id="dash-platform">—</span>
+              <span>Node:</span><span id="dash-node">—</span>
+              <span>Max Concurrent:</span><span id="dash-max-concurrent">—</span>
+              <span>Timeout:</span><span id="dash-timeout">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="live-log-section">
+        <h3>📋 Live Log</h3>
+        <div class="live-log" id="live-log">
+          <div class="empty-state">Waiting for events...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ──── HISTORY TAB ──── -->
+    <section class="tab-content" id="tab-history">
+      <div class="history-controls">
+        <h2>📜 Command History</h2>
+        <div class="history-filters">
+          <select id="history-filter-status">
+            <option value="all">All Statuses</option>
+            <option value="completed">✅ Completed</option>
+            <option value="failed">❌ Failed</option>
+            <option value="blocked">🚫 Blocked</option>
+            <option value="timeout">⏰ Timeout</option>
+            <option value="killed">🔪 Killed</option>
+          </select>
+          <button class="refresh-btn" id="btn-refresh-history">🔄 Refresh</button>
+        </div>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">No command history yet</div>
+      </div>
+    </section>
+
+    <!-- ──── SETTINGS TAB ──── -->
+    <section class="tab-content" id="tab-settings">
+      <div class="settings-container">
+        <div class="settings-section">
+          <h2>⚡ Super Mode</h2>
+          <div class="setting-row">
+            <label>Enable Super Mode</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-super-mode">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <p class="setting-desc">When ON, commands are executed according to permission rules without additional confirmation.</p>
+        </div>
+
+        <div class="settings-section">
+          <h2>🔐 Permissions</h2>
+          <div class="setting-row">
+            <label>Allow Shell Commands</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-allow-shell">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label>Allow File Operations</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-allow-files">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label>Allow Network Requests</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-allow-network">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label>Allow Process Kill</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-allow-kill">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label>Allow Elevated (Admin)</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-allow-elevated">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2>🛡️ Safety</h2>
+          <div class="setting-row">
+            <label>Command Timeout (ms)</label>
+            <input type="number" id="setting-timeout" class="setting-input" min="1000" step="1000">
+          </div>
+          <div class="setting-row">
+            <label>Max Concurrent Processes</label>
+            <input type="number" id="setting-max-concurrent" class="setting-input" min="1" max="20">
+          </div>
+          <div class="setting-row wide">
+            <label>Blocked Commands (one per line)</label>
+            <textarea id="setting-blocked-commands" class="setting-textarea" rows="4" placeholder="format&#10;del /s /q C:\&#10;rm -rf /"></textarea>
+          </div>
+          <div class="setting-row wide">
+            <label>Blocked Paths (one per line)</label>
+            <textarea id="setting-blocked-paths" class="setting-textarea" rows="3" placeholder="C:\Windows\System32&#10;C:\Windows\SysWOW64"></textarea>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2>✅ Auto-Approve Patterns</h2>
+          <div class="setting-row">
+            <label>Enable Auto-Approve</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-approve">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row wide">
+            <label>Auto-Approve Patterns (one per line, supports *)</label>
+            <textarea id="setting-auto-patterns" class="setting-textarea" rows="6" placeholder="npm *&#10;node *&#10;git *&#10;python *"></textarea>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2>🔍 Process Guard</h2>
+          <div class="setting-row">
+            <label>Enable Process Guard</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-guard-enabled">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label>Hang Detection Timeout (ms)</label>
+            <input type="number" id="setting-hang-timeout" class="setting-input" min="5000" step="5000">
+          </div>
+          <div class="setting-row">
+            <label>Auto-Kill Hanging</label>
+            <label class="switch">
+              <input type="checkbox" id="setting-auto-kill">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2>📄 Raw Config (JSON)</h2>
+          <textarea id="settings-raw-json" class="raw-json-editor" rows="15"></textarea>
+          <div class="settings-buttons">
+            <button class="save-btn" id="btn-save-settings">💾 Save Settings</button>
+            <button class="refresh-btn" id="btn-reload-settings">🔄 Reload from Server</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══════════ TOAST NOTIFICATIONS ═══════════ -->
+  <div id="toast-container"></div>
+
+  <!-- ═══════════ CONFIRM MODAL ═══════════ -->
+  <div class="modal-overlay" id="confirm-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>⚠️ Confirmation Required</h3>
+      </div>
+      <div class="modal-body">
+        <p>The following command requires your confirmation:</p>
+        <code class="modal-command" id="confirm-command"></code>
+      </div>
+      <div class="modal-actions">
+        <button class="danger-btn" id="btn-confirm-reject">✖ Reject</button>
+        <button class="execute-btn" id="btn-confirm-approve">✔ Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

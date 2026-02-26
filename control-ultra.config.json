@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "superMode": true,
+  "permissions": {
+    "allowShellCommands": true,
+    "allowFileOperations": true,
+    "allowNetworkRequests": true,
+    "allowProcessKill": true,
+    "allowElevated": false
+  },
+  "safety": {
+    "commandTimeout": 30000,
+    "maxConcurrentProcesses": 5,
+    "blockedCommands": [
+      "format",
+      "del /s /q C:\\",
+      "rd /s /q C:\\",
+      "rm -rf /",
+      "mkfs",
+      "shutdown /s",
+      "shutdown /r"
+    ],
+    "blockedPaths": [
+      "C:\\Windows\\System32",
+      "C:\\Windows\\SysWOW64"
+    ],
+    "requireConfirmation": [
+      "sudo",
+      "runas",
+      "admin"
+    ]
+  },
+  "autoApprove": {
+    "enabled": true,
+    "patterns": [
+      "npm *",
+      "npx *",
+      "node *",
+      "python *",
+      "pip *",
+      "git *",
+      "echo *",
+      "type *",
+      "dir *",
+      "ls *",
+      "cat *",
+      "mkdir *",
+      "cd *",
+      "code *"
+    ],
+    "directories": [
+      "C:\\Users\\*\\Desktop\\*",
+      "C:\\Users\\*\\Documents\\*",
+      "C:\\projects\\*"
+    ]
+  },
+  "processGuard": {
+    "enabled": true,
+    "checkIntervalMs": 5000,
+    "hangDetectionTimeout": 60000,
+    "autoKillHanging": true,
+    "maxMemoryMB": 512,
+    "maxCpuPercent": 90
+  },
+  "logging": {
+    "enabled": true,
+    "level": "verbose",
+    "maxFileSizeMB": 10,
+    "rotateFiles": 5
+  }
+}
