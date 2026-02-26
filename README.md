@@ -8,202 +8,122 @@
 
 ## Autonomous Command Executor for AI Assistants
 
-Control Ultra gives AI assistants full autonomous access to execute commands on the user's machine. One file. No confirmations. No hanging processes.
+Control Ultra gives AI assistants full autonomous access to execute commands on the user's machine.
+
+**You only need one file: `control-ultra.cmd`**
+
+Drop it into any project. Tell the AI to use it. Done.
 
 ### The Problem
 
 AI assistants in modern IDEs:
 - Require manual approval for every single command
 - Hang on long-running processes, forcing system reboots
-- Cannot inspect commands inside files — only direct terminal input
 - Cannot operate autonomously — always need a human in the loop
 
 ### The Solution
 
-User drops **one file** into their project and tells the AI:
-
-> "Use Control Ultra for all commands. Work autonomously."
-
-Control Ultra provides three execution methods, each designed to maximize autonomy:
-
-**Direct execution** — for simple commands:
-```batch
-cu.cmd exec "npm install express"
+```
+1. Copy control-ultra.cmd into your project folder
+2. Tell the AI: "Use Control Ultra for all commands."
+3. The AI works fully autonomously — zero clicks from you.
 ```
 
-**Task file** — AI writes commands to a file, then runs them all at once. The IDE cannot inspect file contents, so commands like `git push` pass through without approval:
-```batch
-:: AI writes to cu-task.txt:     git add -A
-::                                git commit -m "update"
-::                                git push origin main
-cu.cmd task
-```
+Everything the AI needs is embedded inside `control-ultra.cmd`:
+- Full autonomy instructions (`control-ultra.cmd prompt`)
+- Command execution with timeouts and safety
+- IDE command-blocking bypass (task mode)
+- Pre-defined shortcuts for common operations
 
-**Numbered shortcuts** — pre-defined command sequences triggered by a single number:
-```batch
-cu.cmd 1    :: = git add + commit + push
-cu.cmd 2    :: = npm install
-cu.cmd 3    :: = npm start
-```
+All helper files (`cu-exec-helper.ps1`, `cu-shortcuts.txt`) are auto-generated on first run. No setup required.
 
 ---
 
 ### How It Works
 
-The key insight: IDEs scan the **text** of terminal commands for dangerous operations and block them. But they **cannot see inside files**. Control Ultra exploits this:
+IDEs scan the **text** of terminal commands and block dangerous ones. But they **cannot see inside files**.
 
-1. The AI uses its file-writing capability (which needs no approval) to write commands into `cu-task.txt`
-2. The AI runs `cu.cmd task` — the IDE sees a harmless batch file call
-3. `cu.cmd task` reads and executes every line in the file
-4. Result: `git push`, `npm install`, `node server.js` — all execute without a single click
+Control Ultra exploits this:
 
-This is not a hack. The user explicitly grants Control Ultra permission by placing it in their project. The safety system (`cu-shortcuts.txt`, blocked commands, timeouts) ensures nothing destructive can happen.
+1. The AI writes commands to `cu-task.txt` using its file-writing capability (needs no approval)
+2. The AI runs `control-ultra.cmd task` — the IDE sees a harmless batch file call
+3. `control-ultra.cmd task` reads and executes every line from the file
+4. Result: `git push`, `npm install`, `node server.js` — all without a single click
+
+The user explicitly grants permission by placing the file in their project. Built-in safety (blocked commands, timeouts) prevents anything destructive.
 
 ---
 
-### Quick Start
+### Usage
 
-#### Option 1: Batch File
-
-1. Copy `cu.cmd` into your project folder
-2. Open any AI chat (Cursor, VS Code Copilot, Windsurf, Claude, ChatGPT)
-3. Paste the contents of `AI-PROMPT.md` as context
-4. Say: *"Build me an Express API with authentication"*
-5. The AI handles everything through Control Ultra
-
-#### Option 2: PowerShell (JSON output)
-
-```powershell
-.\cu.ps1 exec "git status" -Json
-.\cu.ps1 multi "npm init -y", "npm install express", "node -v"
+#### Direct execution
+```batch
+control-ultra.cmd exec "npm init -y"
+control-ultra.cmd exec "npm install express" -t 300
+control-ultra.cmd exec "node app.js"
 ```
 
-#### Option 3: Web Server (full API)
+#### Task file (bypasses IDE blocking)
+```batch
+:: AI writes commands to cu-task.txt, then runs:
+control-ultra.cmd task
+```
+
+#### Numbered shortcuts
+```batch
+control-ultra.cmd 1    :: git add + commit + push
+control-ultra.cmd 2    :: npm install
+control-ultra.cmd 3    :: npm start
+control-ultra.cmd 4    :: npm test
+control-ultra.cmd 5    :: npm run build
+control-ultra.cmd 7    :: git status
+```
+
+#### All commands
+```
+control-ultra.cmd exec "command"       Execute a command
+control-ultra.cmd exec "cmd" -t 60    Custom timeout (seconds)
+control-ultra.cmd task                 Run commands from cu-task.txt
+control-ultra.cmd [1-9]                Run numbered shortcut
+control-ultra.cmd shortcuts            List all shortcuts
+control-ultra.cmd prompt               Show full AI autonomy instructions
+control-ultra.cmd batch file.txt       Execute commands from any file
+control-ultra.cmd daemon               Background queue mode
+control-ultra.cmd status               Show status and logs
+control-ultra.cmd help                 Quick help
+```
+
+---
+
+### What You Get
+
+**One file (`control-ultra.cmd`) provides:**
+
+| Feature | Description |
+|---------|-------------|
+| Command execution | Run anything with timeout protection |
+| Safety system | Blocks `format`, `del /s C:\`, `rm -rf /`, `shutdown` |
+| Task mode | Write commands to file, execute all at once (IDE bypass) |
+| Shortcuts | 9 pre-defined operations, customizable via `cu-shortcuts.txt` |
+| Batch mode | Execute commands from any text file |
+| Daemon mode | Background watcher, picks up commands from queue file |
+| Logging | All actions logged to `cu-log.txt` |
+| AI prompt | Full autonomy instructions built into the file |
+| Auto-setup | Helper files generated on first run, no dependencies |
+
+---
+
+### Web Server (Optional, Advanced)
+
+For teams or complex workflows, the project also includes a Node.js web server with REST API:
 
 ```bash
 npm install && npm start
 # Dashboard: http://127.0.0.1:3777
-# REST API with 45+ endpoints
+# 45+ REST API endpoints for commands, files, environment, scaffolding
 ```
 
----
-
-### Execution Methods
-
-| Method | Command | When to use |
-|--------|---------|-------------|
-| Direct | `cu.cmd exec "command"` | Simple commands, no IDE blocking |
-| Task file | Write to `cu-task.txt`, run `cu.cmd task` | IDE blocks commands, multi-step operations |
-| Shortcuts | `cu.cmd 1` through `cu.cmd 9` | Frequent operations (git push, npm install) |
-| Batch file | `cu.cmd batch commands.txt` | Execute a list from any file |
-| Daemon | `cu.cmd daemon` | Background mode, watches queue file |
-| PowerShell | `.\cu.ps1 exec "cmd" -Json` | Structured JSON output |
-| Web API | `POST /api/commands` | HTTP-based, no terminal needed |
-
-### Default Shortcuts
-
-| # | Command |
-|---|---------|
-| 1 | `git add -A && git commit -m update && git push origin main` |
-| 2 | `npm install` |
-| 3 | `npm start` |
-| 4 | `npm test` |
-| 5 | `npm run build` |
-| 6 | `node src/server.js` |
-| 7 | `git status` |
-| 8 | `git pull origin main` |
-| 9 | `git log --oneline -10` |
-
-Custom shortcuts: edit `cu-shortcuts.txt` (format: `NUMBER=command`)
-
----
-
-### Project Structure
-
-| File | Purpose |
-|------|---------|
-| `cu.cmd` | Main executor (v2.0) — task mode, shortcuts, direct exec |
-| `cu.ps1` | PowerShell version with JSON output |
-| `cu-server.cmd` | Server manager (start / stop / restart / status) |
-| `cu-task.txt` | Task file — AI writes commands here for `cu.cmd task` |
-| `cu-shortcuts.txt` | Numbered shortcuts configuration |
-| `AI-PROMPT.md` | Full autonomy prompt — paste into AI chat |
-| `CU-README.txt` | Quick-reference prompt for AI |
-
-#### Web Server Modules
-
-| Module | Description |
-|--------|-------------|
-| `src/core/engine.js` | Command queue, execution, timeouts, process management |
-| `src/core/guard.js` | Automatic termination of hanging processes |
-| `src/core/superfile.js` | Permissions and safety configuration |
-| `src/modules/fileops.js` | File operations (CRUD, search, directory tree) |
-| `src/modules/envdetect.js` | Environment scanner (runtimes, tools, project analysis) |
-| `src/modules/chain.js` | Command chains with conditions, retries, parallelism |
-| `src/modules/scaffold.js` | Project templates (8 types) |
-| `src/api/routes.js` | REST API (45+ endpoints) |
-| `src/api/websocket.js` | WebSocket for live output streaming |
-| `src/public/` | Web dashboard |
-
----
-
-### API Reference
-
-#### Commands
-```
-POST /api/commands          — Execute a command
-POST /api/commands/batch    — Execute a batch of commands
-GET  /api/commands/:id      — Get command status
-POST /api/commands/:id/kill — Kill a running process
-POST /api/commands/:id/input — Send stdin to process
-POST /api/commands/kill-all — Kill all running processes
-```
-
-#### Files
-```
-POST /api/files/create      — Create file (auto-creates directories)
-POST /api/files/read        — Read file contents
-POST /api/files/write       — Write to file
-POST /api/files/append      — Append to file
-POST /api/files/replace     — Find and replace text
-POST /api/files/search      — Search across files (grep)
-POST /api/files/tree        — Directory tree view
-POST /api/files/list        — List directory contents
-POST /api/files/copy        — Copy file or directory
-POST /api/files/move        — Move or rename
-POST /api/files/remove      — Delete file or directory
-POST /api/files/exists      — Check if path exists
-```
-
-#### Environment
-```
-GET  /api/env               — Full system scan
-POST /api/env/analyze       — Analyze project type and stack
-POST /api/env/check         — Check what tools are missing
-```
-
-#### Scaffolding
-```
-GET  /api/scaffold/templates — List available templates
-POST /api/scaffold/create    — Create project from template
-```
-
-Templates: `node-basic`, `node-express`, `node-cli`, `python-basic`, `python-flask`, `python-fastapi`, `html-basic`, `fullstack-express-react`
-
-#### Chains
-```
-POST /api/chain             — Sequential execution with conditions
-POST /api/parallel          — Parallel execution
-```
-
-#### Management
-```
-GET  /api/status            — System status
-GET  /api/history           — Command history
-GET  /api/config            — Current configuration
-PATCH /api/config           — Update configuration
-POST /api/restart           — Restart server
-```
+This is **optional**. The single `control-ultra.cmd` file works standalone without Node.js.
 
 ---
 
@@ -211,17 +131,9 @@ POST /api/restart           — Restart server
 
 ```bash
 npm start
-cu.cmd exec "node test-all.js"
+control-ultra.cmd exec "node test-all.js"
 # 89 tests, all passing
 ```
-
-### Safety
-
-- Blocked: `format`, `del /s /q C:\`, `rm -rf /`, `shutdown`
-- Default timeout: 120 seconds (configurable per command with `-t`)
-- Automatic process tree termination on timeout
-- Full execution log in `cu-log.txt`
-- Configuration in `control-ultra.config.json`
 
 ### License
 
@@ -234,100 +146,105 @@ MIT
 
 ## Автономный исполнитель команд для AI-ассистентов
 
-Control Ultra дает AI-ассистентам полный автономный доступ к выполнению команд на компьютере пользователя. Один файл. Без подтверждений. Без зависаний.
+Control Ultra дает AI-ассистентам полный автономный доступ к выполнению команд.
+
+**Нужен только один файл: `control-ultra.cmd`**
+
+Кинь его в проект. Скажи AI использовать его. Готово.
 
 ### Проблема
 
 AI-ассистенты в IDE:
 - Требуют ручного подтверждения каждой команды
 - Зависают на долгих процессах, приходится ребутить ПК
-- Не видят содержимое файлов при проверке команд терминала
 - Не могут работать автономно — всегда нужен человек
 
 ### Решение
 
-Пользователь кидает **один файл** в проект и говорит AI:
-
-> "Используй Control Ultra для всех команд. Работай автономно."
-
-Три метода выполнения, каждый для максимальной автономии:
-
-**Прямое выполнение** — для простых команд:
-```batch
-cu.cmd exec "npm install express"
+```
+1. Скопируй control-ultra.cmd в папку проекта
+2. Скажи AI: "Используй Control Ultra для всех команд."
+3. AI работает полностью автономно — ноль кликов от тебя.
 ```
 
-**Task-файл** — AI записывает команды в файл, затем запускает. IDE не может проверить содержимое файла, поэтому `git push` проходит без одобрения:
-```batch
-:: AI записывает в cu-task.txt:  git add -A
-::                                git commit -m "update"
-::                                git push origin main
-cu.cmd task
-```
+Всё что нужно AI — встроено внутри `control-ultra.cmd`:
+- Полная инструкция автономности (`control-ultra.cmd prompt`)
+- Выполнение команд с таймаутами и защитой
+- Обход блокировки команд IDE (task mode)
+- Предустановленные шорткаты для частых операций
 
-**Нумерованные шорткаты** — заранее заданные цепочки команд по номеру:
-```batch
-cu.cmd 1    :: = git add + commit + push
-cu.cmd 2    :: = npm install
-cu.cmd 3    :: = npm start
-```
+Все вспомогательные файлы (`cu-exec-helper.ps1`, `cu-shortcuts.txt`) генерятся автоматически при первом запуске. Настройка не нужна.
 
 ---
 
 ### Как это работает
 
-Ключевая идея: IDE сканирует **текст** команд терминала и блокирует опасные. Но IDE **не видит содержимое файлов**. Control Ultra использует это:
+IDE сканирует **текст** команд терминала и блокирует опасные. Но IDE **не видит содержимое файлов**.
+
+Control Ultra использует это:
 
 1. AI записывает команды в `cu-task.txt` через функцию записи файлов (не требует одобрения)
-2. AI запускает `cu.cmd task` — IDE видит безобидный вызов батника
-3. `cu.cmd task` читает и выполняет каждую строку из файла
+2. AI запускает `control-ultra.cmd task` — IDE видит безобидный вызов батника
+3. `control-ultra.cmd task` читает и выполняет каждую строку из файла
 4. Результат: `git push`, `npm install`, `node server.js` — всё без единого клика
 
-Это не хак. Пользователь явно дает Control Ultra разрешение, размещая его в проекте. Система безопасности (блокировка команд, таймауты) гарантирует, что ничего деструктивного не произойдет.
+Пользователь явно дает разрешение, размещая файл в проекте. Встроенная защита (блокировка команд, таймауты) не дает ничего разрушить.
 
 ---
 
-### Быстрый старт
+### Использование
 
-1. Скопируй `cu.cmd` в папку проекта
-2. Открой AI-чат (Cursor, VS Code Copilot, Windsurf, Claude, ChatGPT)
-3. Вставь содержимое `AI-PROMPT.md` как контекст
-4. Скажи: *"Создай Express API с авторизацией"*
-5. AI делает все сам через Control Ultra
-
-### Шорткаты по умолчанию
-
-| # | Команда |
-|---|---------|
-| 1 | `git add -A && git commit -m update && git push origin main` |
-| 2 | `npm install` |
-| 3 | `npm start` |
-| 4 | `npm test` |
-| 5 | `npm run build` |
-| 6 | `node src/server.js` |
-| 7 | `git status` |
-| 8 | `git pull origin main` |
-| 9 | `git log --oneline -10` |
-
-Свои шорткаты: редактируй `cu-shortcuts.txt` (формат: `НОМЕР=команда`)
-
----
-
-### Тестирование
-
-```bash
-npm start
-cu.cmd exec "node test-all.js"
-# 89 тестов, все проходят
+#### Прямое выполнение
+```batch
+control-ultra.cmd exec "npm init -y"
+control-ultra.cmd exec "npm install express" -t 300
+control-ultra.cmd exec "node app.js"
 ```
 
-### Безопасность
+#### Task-файл (обход блокировки IDE)
+```batch
+:: AI записывает команды в cu-task.txt, затем:
+control-ultra.cmd task
+```
 
-- Заблокировано: `format`, `del /s /q C:\`, `rm -rf /`, `shutdown`
-- Таймаут: 120 секунд (настраивается через `-t`)
-- Автозавершение дерева процессов при таймауте
-- Лог действий в `cu-log.txt`
-- Конфигурация в `control-ultra.config.json`
+#### Шорткаты
+```batch
+control-ultra.cmd 1    :: git add + commit + push
+control-ultra.cmd 2    :: npm install
+control-ultra.cmd 3    :: npm start
+control-ultra.cmd 4    :: npm test
+control-ultra.cmd 5    :: npm run build
+control-ultra.cmd 7    :: git status
+```
+
+---
+
+### Что внутри одного файла
+
+| Функция | Описание |
+|---------|----------|
+| Выполнение команд | Запуск чего угодно с таймаутом |
+| Система безопасности | Блокирует `format`, `del /s C:\`, `rm -rf /`, `shutdown` |
+| Task mode | Запись команд в файл, выполнение пакетом (обход IDE) |
+| Шорткаты | 9 операций, настраиваются через `cu-shortcuts.txt` |
+| Daemon mode | Фоновый режим, подхватывает команды из очереди |
+| Логирование | Все действия в `cu-log.txt` |
+| AI промпт | Полная инструкция автономности встроена в файл |
+| Автонастройка | Вспомогательные файлы генерятся при первом запуске |
+
+---
+
+### Веб-сервер (опционально)
+
+Для команд или сложных сценариев — Node.js сервер с REST API:
+
+```bash
+npm install && npm start
+# Dashboard: http://127.0.0.1:3777
+# 45+ API эндпоинтов
+```
+
+Это **опционально**. Один `control-ultra.cmd` работает без Node.js.
 
 ### Лицензия
 
