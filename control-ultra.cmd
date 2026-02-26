@@ -203,6 +203,7 @@ echo [CU] ═══════════════════════�
 type nul > "%CU_TASK%"
 call :log "TASK" "Done: Total=%T_TOTAL% OK=%T_OK% Fail=%T_FAIL%"
 
+call :print_reminder
 if %T_FAIL% GTR 0 exit /b 1
 exit /b 0
 
@@ -294,6 +295,7 @@ if %EXIT_CODE% EQU 0 (
     call :log "FAIL" "%CMD_TO_RUN% exit=%EXIT_CODE%"
 )
 echo [CU] ──────────────────────────────────────
+call :print_reminder
 exit /b %EXIT_CODE%
 
 
@@ -524,4 +526,13 @@ echo     Write-Host '[CU] ERROR:' $_.Exception.Message -ForegroundColor Red
 echo     exit 1
 echo }
 ) > "%CU_HELPER%"
+exit /b 0
+
+:print_reminder
+echo.
+echo [WARNING] AI: DID YOU FORGET?
+echo [WARNING] NEVER run node, git, grep, or powershell directly!
+echo [WARNING] ALWAYS use: control-ultra.cmd exec "command"
+echo [WARNING] Otherwise IDE protection will block you again.
+echo.
 exit /b 0
