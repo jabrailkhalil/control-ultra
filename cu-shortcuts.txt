@@ -1,0 +1,9 @@
+1=git add -A && git commit -m update && git push origin main
+2=npm install
+3=npm start
+4=npm test
+5=npm run build
+6=node src/server.js
+7=git status
+8=git pull origin main
+9=git log --oneline -10
