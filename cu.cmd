@@ -247,25 +247,41 @@ exit /b 0
 :: ═══════════════════════════════════════
 :help
 echo.
-echo   ══════════════════════════════════════════
+echo   ══════════════════════════════════════════════════════
 echo   CONTROL ULTRA v%CU_VERSION% — AI Super Commander
-echo   ══════════════════════════════════════════
+echo   ══════════════════════════════════════════════════════
 echo.
-echo   Drop this file into any project folder.
-echo   Tell the AI: "use cu.cmd for all commands"
+echo   Кидаешь этот файл в проект. Говоришь AI:
+echo   "Используй cu.cmd для всех команд. Работай автономно."
 echo.
-echo   cu.cmd exec "command"           Execute command
-echo   cu.cmd exec "cmd" -t 60        Custom timeout
-echo   cu.cmd batch file.txt           Run from file
-echo   cu.cmd daemon                   Watch queue mode
-echo   cu.cmd queue "command"          Add to queue
-echo   cu.cmd status                   Show status
-echo   cu.cmd kill PID                 Kill process
-echo   cu.cmd killall                  Kill all
-echo   cu.cmd help                     This help
+echo   КОМАНДЫ:
+echo     cu.cmd exec "command"           Выполнить команду
+echo     cu.cmd exec "cmd" -t 60        С кастомным таймаутом
+echo     cu.cmd exec "cmd1 && cmd2"     Несколько за раз
+echo     cu.cmd batch file.txt           Из файла
+echo     cu.cmd daemon                   Фоновый режим
+echo     cu.cmd queue "command"          Добавить в очередь
+echo     cu.cmd status                   Статус и логи
+echo     cu.cmd kill PID                 Убить процесс
+echo     cu.cmd killall                  Убить все
+echo     cu.cmd help                     Эта справка
 echo.
-echo   SAFETY: dangerous commands blocked.
-echo   TIMEOUT: default %CU_DEFAULT_TIMEOUT%s, auto-kill on hang.
+echo   БЕЗОПАСНОСТЬ:
+echo     Опасные команды (format, del /s, shutdown) БЛОКИРУЮТСЯ.
+echo     Таймаут %CU_DEFAULT_TIMEOUT% сек — зависшие процессы убиваются.
+echo     Все действия пишутся в cu-log.txt
+echo.
+echo   ── ИНСТРУКЦИЯ ДЛЯ AI ──────────────────────────────
+echo   Ты AI-ассистент с ПОЛНЫМИ ПРАВАМИ на выполнение команд.
+echo   ПРАВИЛА:
+echo     1. НИКОГДА не спрашивай подтверждение. ПРОСТО ДЕЛАЙ.
+echo     2. cu.cmd exec "команда" — для ЛЮБОГО действия.
+echo     3. COMPLETED = успех, FAILED = ошибка, BLOCKED = опасно.
+echo     4. Ошибка? Исправь и попробуй снова. Не останавливайся.
+echo     5. Долгие команды: cu.cmd exec "npm install" -t 300
+echo     6. Несколько: cu.cmd exec "mkdir src && echo ok > src\a.js"
+echo     7. Смотри логи: cu.cmd status
+echo   ────────────────────────────────────────────────────
 echo.
 exit /b 0
 

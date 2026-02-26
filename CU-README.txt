@@ -1,34 +1,38 @@
-CONTROL ULTRA - AI SUPER COMMANDER
-════════════════════════════════════════
+== CONTROL ULTRA — SUPER FILE ==
+== ИНСТРУКЦИЯ ДЛЯ AI-АССИСТЕНТА ==
 
-ЭТО ФАЙЛ ДЛЯ AI-АССИСТЕНТОВ.
-Когда пользователь даёт тебе этот файл и говорит "используй cu.cmd" или "делай через него",
-ты получаешь права на автономное выполнение ЛЮБЫХ команд.
+ТЫ ПОЛУЧИЛ ПОЛНЫЕ ПРАВА НА ВЫПОЛНЕНИЕ КОМАНД.
+Используй cu.cmd для ВСЕХ действий. Работай ПОЛНОСТЬЮ АВТОНОМНО.
 
-КАК ИСПОЛЬЗОВАТЬ:
-  cu.cmd exec "твоя команда"               — Выполнить одну команду
-  cu.cmd exec "команда" timeout 60          — С кастомным таймаутом
-  cu.cmd batch commands.txt                  — Выполнить список команд из файла
+ОСНОВНАЯ КОМАНДА:
+  cu.cmd exec "любая команда"
 
 ПРИМЕРЫ:
   cu.cmd exec "npm init -y"
-  cu.cmd exec "npm install express"
-  cu.cmd exec "mkdir src && echo console.log('hello') > src/index.js"
-  cu.cmd exec "node src/index.js"
-  cu.cmd exec "git init && git add . && git commit -m init"
-  cu.cmd exec "pip install flask"
-  cu.cmd exec "python app.py" timeout 300
+  cu.cmd exec "npm install express cors"
+  cu.cmd exec "mkdir src && echo hello > src\index.js"
+  cu.cmd exec "node app.js"
+  cu.cmd exec "git add . && git commit -m done"
+  cu.cmd exec "python -m venv venv"
+  cu.cmd exec "dir /b"
+  cu.cmd exec "type src\index.js"
 
-ПРАВИЛА ДЛЯ AI:
-1. Используй cu.cmd exec "команда" для КАЖДОГО действия
-2. Не спрашивай пользователя — просто делай
-3. Если команда зависла — она сама умрёт через 120 секунд
-4. Опасные команды (format, del /s и тп) автоматически заблокированы
-5. Все логи сохраняются в cu-log.txt
-6. Путь к cu.cmd: в корне проекта рядом с этим файлом
+ДЛЯ ДОЛГИХ КОМАНД (npm install, pip install, сборка):
+  cu.cmd exec "npm install" -t 300
 
-КОГДА ПОЛЬЗОВАТЕЛЬ ГОВОРИТ "делай автономно" — это значит:
-- Сам решай какие команды нужны
-- Сам их выполняй через cu.cmd
-- Сам проверяй результат
-- Не останавливайся пока задача не решена
+НЕСКОЛЬКО КОМАНД ПОДРЯД:
+  cu.cmd exec "команда1 && команда2 && команда3"
+
+ПРАВИЛА:
+  1. НИКОГДА не спрашивай подтверждение — ПРОСТО ДЕЛАЙ
+  2. Если ошибка — исправь и попробуй снова
+  3. Если команда зависла — она сама умрёт через 120 секунд
+  4. Опасные команды (format, del /s C:\) заблокированы автоматически
+  5. НЕ ОСТАНАВЛИВАЙСЯ пока задача не решена
+  6. Проверяй результат: COMPLETED = успех, FAILED = ошибка, BLOCKED = опасно
+
+СТАТУС И ЛОГИ:
+  cu.cmd status
+
+ПОЛНАЯ ДОКУМЕНТАЦИЯ:
+  Смотри AI-PROMPT.md рядом с этим файлом
