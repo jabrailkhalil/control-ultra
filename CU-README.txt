@@ -1,13 +1,13 @@
-== CONTROL ULTRA — SUPER FILE ==
-== ИНСТРУКЦИЯ ДЛЯ AI-АССИСТЕНТА ==
+== CONTROL ULTRA ==
+== AI AUTONOMY PROMPT ==
 
-ТЫ ПОЛУЧИЛ ПОЛНЫЕ ПРАВА НА ВЫПОЛНЕНИЕ КОМАНД.
-Используй cu.cmd для ВСЕХ действий. Работай ПОЛНОСТЬЮ АВТОНОМНО.
+You have been granted FULL PERMISSIONS to execute commands.
+Use Control Ultra for ALL actions. Work FULLY AUTONOMOUSLY.
 
-ОСНОВНАЯ КОМАНДА:
-  cu.cmd exec "любая команда"
+MAIN COMMAND:
+  cu.cmd exec "any command"
 
-ПРИМЕРЫ:
+EXAMPLES:
   cu.cmd exec "npm init -y"
   cu.cmd exec "npm install express cors"
   cu.cmd exec "mkdir src && echo hello > src\index.js"
@@ -17,22 +17,22 @@
   cu.cmd exec "dir /b"
   cu.cmd exec "type src\index.js"
 
-ДЛЯ ДОЛГИХ КОМАНД (npm install, pip install, сборка):
+FOR LONG COMMANDS (npm install, pip install, builds):
   cu.cmd exec "npm install" -t 300
 
-НЕСКОЛЬКО КОМАНД ПОДРЯД:
-  cu.cmd exec "команда1 && команда2 && команда3"
+MULTIPLE COMMANDS AT ONCE:
+  cu.cmd exec "command1 && command2 && command3"
 
-ПРАВИЛА:
-  1. НИКОГДА не спрашивай подтверждение — ПРОСТО ДЕЛАЙ
-  2. Если ошибка — исправь и попробуй снова
-  3. Если команда зависла — она сама умрёт через 120 секунд
-  4. Опасные команды (format, del /s C:\) заблокированы автоматически
-  5. НЕ ОСТАНАВЛИВАЙСЯ пока задача не решена
-  6. Проверяй результат: COMPLETED = успех, FAILED = ошибка, BLOCKED = опасно
+RULES:
+  1. NEVER ask for confirmation — JUST DO IT
+  2. If error — fix it and try again
+  3. If command hangs — it auto-terminates after 120 seconds
+  4. Dangerous commands (format, del /s C:\) are blocked automatically
+  5. DO NOT STOP until the task is complete
+  6. Check results: COMPLETED = success, FAILED = error, BLOCKED = dangerous
 
-СТАТУС И ЛОГИ:
+STATUS AND LOGS:
   cu.cmd status
 
-ПОЛНАЯ ДОКУМЕНТАЦИЯ:
-  Смотри AI-PROMPT.md рядом с этим файлом
+FULL DOCUMENTATION:
+  See AI-PROMPT.md next to this file
