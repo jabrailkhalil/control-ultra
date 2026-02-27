@@ -32,11 +32,11 @@ set "CU_QUEUE=%CU_DIR%cu-queue.txt"
 set "CU_RESULTS=%CU_DIR%cu-results"
 set "CU_TASK=%CU_DIR%cu-task.txt"
 set "CU_SHORTCUTS=%CU_DIR%cu-shortcuts.txt"
-set "CU_DEFAULT_TIMEOUT=120"
-set "CU_HELPER=%CU_DIR%cu-exec-helper.ps1"
+set "CU_DEFAULT_TIMEOUT=30"
 
 if not exist "%CU_RESULTS%" mkdir "%CU_RESULTS%" 2>nul
-call :create_helper
+:: Kill any zombie powershell from previous broken runs
+taskkill /im powershell.exe /f >nul 2>&1
 if not exist "%CU_SHORTCUTS%" call :create_default_shortcuts
 if not exist "%CU_DIR%.agent\workflows\control-ultra.md" call :create_workflow
 
@@ -207,7 +207,7 @@ for /f "usebackq delims=" %%L in ("%CU_TASK%") do (
         echo [CU] -- Task !T_TOTAL!: %%L
         echo [CU] Running: %%L
         > "!CU_TEMP_TASK!" echo @%%L
-        call :run_with_timeout "!CU_TEMP_TASK!" !CU_DEFAULT_TIMEOUT!
+        call "!CU_TEMP_TASK!"
         if !ERRORLEVEL! EQU 0 (
             echo [CU] OK
             set /a T_OK+=1
@@ -312,8 +312,9 @@ call :log "EXEC" "!CMD_TO_RUN!"
 
 set "CU_EXEC_TEMP=%CU_DIR%cu-exec-temp.cmd"
 > "!CU_EXEC_TEMP!" echo @!CMD_TO_RUN!
-call :run_with_timeout "!CU_EXEC_TEMP!" %TIMEOUT_SEC%
+call "!CU_EXEC_TEMP!"
 set "EXIT_CODE=!ERRORLEVEL!"
+del "!CU_EXEC_TEMP!" 2>nul
 
 echo.
 if %EXIT_CODE% EQU 0 (
@@ -524,29 +525,7 @@ echo 9=git log --oneline -10
 ) > "%CU_SHORTCUTS%"
 exit /b 0
 
-:create_helper
-(
-echo param^([string]$Cmd, [int]$TimeoutSec = 120, [string]$WorkDir = "."^)
-echo try {
-echo     if ^($WorkDir -and ^(Test-Path $WorkDir^)^) { $WorkDir = ^(Resolve-Path $WorkDir^).Path } else { $WorkDir = ^(Get-Location^).Path }
-echo     if ^(Test-Path $Cmd^) { $cmdArgs = '/c "' + $Cmd + '"' } else { $cmdArgs = '/c ' + $Cmd }
-echo     $p = Start-Process cmd.exe -ArgumentList $cmdArgs -WorkingDirectory $WorkDir -NoNewWindow -PassThru
-echo     if ^(-not $p.WaitForExit^($TimeoutSec * 1000^)^) {
-echo         try {
-echo             $children = Get-CimInstance Win32_Process ^| Where-Object { $_.ParentProcessId -eq $p.Id }
-echo             foreach ^($c in $children^) { Stop-Process -Id $c.ProcessId -Force -ErrorAction SilentlyContinue }
-echo             Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-echo         } catch {}
-echo         Write-Host '[CU] TIMEOUT: killed after' $TimeoutSec 'seconds' -ForegroundColor Yellow
-echo         exit 124
-echo     }
-echo     exit $p.ExitCode
-echo } catch {
-echo     Write-Host '[CU] ERROR:' $_.Exception.Message -ForegroundColor Red
-echo     exit 1
-echo }
-) > "%CU_HELPER%"
-exit /b 0
+
 
 :print_reminder
 echo.
@@ -557,48 +536,8 @@ echo [WARNING] Otherwise IDE protection will block you again.
 echo.
 exit /b 0
 
-:: ═══════════════════════════════════════
-:: RUN WITH TIMEOUT (pure batch, no PS)
-:: ═══════════════════════════════════════
-:run_with_timeout
-set "RWT_CMD=%~1"
-set "RWT_TIMEOUT=%~2"
-set "RWT_DONE=%CU_DIR%cu-done.flag"
-set "RWT_EXIT=%CU_DIR%cu-exit.flag"
-set "RWT_PID=%CU_DIR%cu-pid.flag"
-set "RWT_WRAP=%CU_DIR%cu-wrap.cmd"
-del "!RWT_DONE!" 2>nul
-del "!RWT_EXIT!" 2>nul
-del "!RWT_PID!" 2>nul
-:: Create wrapper: run command, write exit code, write done flag
-(
-echo @echo off
-echo call "!RWT_CMD!"
-echo echo %%ERRORLEVEL%% ^> "!RWT_EXIT!"
-echo echo done ^> "!RWT_DONE!"
-) > "!RWT_WRAP!"
-:: Start in background
-start "CU_EXEC" /b cmd /c "!RWT_WRAP!"
-:: Poll for completion
-set /a RWT_WAITED=0
-:rwt_loop
-if exist "!RWT_DONE!" goto :rwt_done
-if !RWT_WAITED! GEQ !RWT_TIMEOUT! goto :rwt_timeout
-ping -n 2 127.0.0.1 >nul
-set /a RWT_WAITED+=1
-goto :rwt_loop
-:rwt_timeout
-echo [CU] TIMEOUT after !RWT_TIMEOUT!s - killing process...
-taskkill /fi "WINDOWTITLE eq CU_EXEC" /f >nul 2>&1
-taskkill /im node.exe /f >nul 2>&1
-taskkill /im curl.exe /f >nul 2>&1
-del "!RWT_DONE!" "!RWT_EXIT!" "!RWT_WRAP!" 2>nul
-exit /b 124
-:rwt_done
-set "RWT_EC=1"
-if exist "!RWT_EXIT!" set /p RWT_EC=<"!RWT_EXIT!"
-del "!RWT_DONE!" "!RWT_EXIT!" "!RWT_WRAP!" 2>nul
-exit /b !RWT_EC!
+
+
 
 :create_workflow
 if not exist "%CU_DIR%.agent\workflows" mkdir "%CU_DIR%.agent\workflows" 2>nul
