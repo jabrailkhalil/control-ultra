@@ -207,7 +207,7 @@ for /f "usebackq delims=" %%L in ("%CU_TASK%") do (
         echo [CU] -- Task !T_TOTAL!: %%L
         echo [CU] Running: %%L
         > "!CU_TEMP_TASK!" echo @%%L
-        call "!CU_TEMP_TASK!"
+        powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "!CU_HELPER!" -Cmd "!CU_TEMP_TASK!" -TimeoutSec !CU_DEFAULT_TIMEOUT! -WorkDir "!CU_DIR!"
         if !ERRORLEVEL! EQU 0 (
             echo [CU] OK
             set /a T_OK+=1
@@ -528,7 +528,8 @@ exit /b 0
 echo param^([string]$Cmd, [int]$TimeoutSec = 120, [string]$WorkDir = "."^)
 echo try {
 echo     if ^($WorkDir -and ^(Test-Path $WorkDir^)^) { $WorkDir = ^(Resolve-Path $WorkDir^).Path } else { $WorkDir = ^(Get-Location^).Path }
-echo     $p = Start-Process cmd.exe -ArgumentList ^("/c " + $Cmd^) -WorkingDirectory $WorkDir -NoNewWindow -PassThru
+echo     if ^(Test-Path $Cmd^) { $cmdArgs = '/c "' + $Cmd + '"' } else { $cmdArgs = '/c ' + $Cmd }
+echo     $p = Start-Process cmd.exe -ArgumentList $cmdArgs -WorkingDirectory $WorkDir -NoNewWindow -PassThru
 echo     if ^(-not $p.WaitForExit^($TimeoutSec * 1000^)^) {
 echo         try {
 echo             $children = Get-CimInstance Win32_Process ^| Where-Object { $_.ParentProcessId -eq $p.Id }
