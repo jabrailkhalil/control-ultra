@@ -207,7 +207,7 @@ for /f "usebackq delims=" %%L in ("%CU_TASK%") do (
         echo [CU] -- Task !T_TOTAL!: %%L
         echo [CU] Running: %%L
         > "!CU_TEMP_TASK!" echo @%%L
-        powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "!CU_HELPER!" -Cmd "!CU_TEMP_TASK!" -TimeoutSec !CU_DEFAULT_TIMEOUT! -WorkDir "!CU_DIR!"
+        call :run_with_timeout "!CU_TEMP_TASK!" !CU_DEFAULT_TIMEOUT!
         if !ERRORLEVEL! EQU 0 (
             echo [CU] OK
             set /a T_OK+=1
@@ -310,9 +310,10 @@ echo [CU] ═══════════════════════�
 
 call :log "EXEC" "!CMD_TO_RUN!"
 
-set "CU_EXEC_CMD=!CMD_TO_RUN!"
-powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%CU_HELPER%" -Cmd "!CMD_TO_RUN!" -TimeoutSec %TIMEOUT_SEC% -WorkDir "%CU_DIR%"
-set "EXIT_CODE=%ERRORLEVEL%"
+set "CU_EXEC_TEMP=%CU_DIR%cu-exec-temp.cmd"
+> "!CU_EXEC_TEMP!" echo @!CMD_TO_RUN!
+call :run_with_timeout "!CU_EXEC_TEMP!" %TIMEOUT_SEC%
+set "EXIT_CODE=!ERRORLEVEL!"
 
 echo.
 if %EXIT_CODE% EQU 0 (
@@ -555,6 +556,49 @@ echo [WARNING] ALWAYS use: control-ultra.cmd exec "command"
 echo [WARNING] Otherwise IDE protection will block you again.
 echo.
 exit /b 0
+
+:: ═══════════════════════════════════════
+:: RUN WITH TIMEOUT (pure batch, no PS)
+:: ═══════════════════════════════════════
+:run_with_timeout
+set "RWT_CMD=%~1"
+set "RWT_TIMEOUT=%~2"
+set "RWT_DONE=%CU_DIR%cu-done.flag"
+set "RWT_EXIT=%CU_DIR%cu-exit.flag"
+set "RWT_PID=%CU_DIR%cu-pid.flag"
+set "RWT_WRAP=%CU_DIR%cu-wrap.cmd"
+del "!RWT_DONE!" 2>nul
+del "!RWT_EXIT!" 2>nul
+del "!RWT_PID!" 2>nul
+:: Create wrapper: run command, write exit code, write done flag
+(
+echo @echo off
+echo call "!RWT_CMD!"
+echo echo %%ERRORLEVEL%% ^> "!RWT_EXIT!"
+echo echo done ^> "!RWT_DONE!"
+) > "!RWT_WRAP!"
+:: Start in background
+start "CU_EXEC" /b cmd /c "!RWT_WRAP!"
+:: Poll for completion
+set /a RWT_WAITED=0
+:rwt_loop
+if exist "!RWT_DONE!" goto :rwt_done
+if !RWT_WAITED! GEQ !RWT_TIMEOUT! goto :rwt_timeout
+ping -n 2 127.0.0.1 >nul
+set /a RWT_WAITED+=1
+goto :rwt_loop
+:rwt_timeout
+echo [CU] TIMEOUT after !RWT_TIMEOUT!s - killing process...
+taskkill /fi "WINDOWTITLE eq CU_EXEC" /f >nul 2>&1
+taskkill /im node.exe /f >nul 2>&1
+taskkill /im curl.exe /f >nul 2>&1
+del "!RWT_DONE!" "!RWT_EXIT!" "!RWT_WRAP!" 2>nul
+exit /b 124
+:rwt_done
+set "RWT_EC=1"
+if exist "!RWT_EXIT!" set /p RWT_EC=<"!RWT_EXIT!"
+del "!RWT_DONE!" "!RWT_EXIT!" "!RWT_WRAP!" 2>nul
+exit /b !RWT_EC!
 
 :create_workflow
 if not exist "%CU_DIR%.agent\workflows" mkdir "%CU_DIR%.agent\workflows" 2>nul
