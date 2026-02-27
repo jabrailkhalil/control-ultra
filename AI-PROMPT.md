@@ -123,7 +123,8 @@ control-ultra.cmd exec "npm run build" -t 600
 - ALWAYS wrap every single command in `control-ultra.cmd exec "..."` (or task file).
 - If you use a raw command, the IDE protection will block you and destroy the automation.
 - **WRONG**: `node -e "..."`
-- **CORRECT**: `control-ultra.cmd exec "node -e \"...\""`
+- **WRONG**: `control-ultra.cmd exec "node -e \"...\""` (NEVER escape quotes with \", cmd.exe crashes)
+- **CORRECT**: `control-ultra.cmd exec "node -e '...'"` (Use single quotes inside double quotes)
 
 ### 3. CHECK EVERY RESULT
 - `COMPLETED` — success, continue to next step
