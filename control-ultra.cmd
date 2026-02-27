@@ -198,8 +198,6 @@ set "T_OK=0"
 set "T_FAIL=0"
 
 set "CU_TEMP_TASK=%CU_DIR%cu-temp-task.cmd"
-set "CU_TCNT=%CU_DIR%cu-tcnt.tmp"
-echo 0 0 0 > "%CU_TCNT%"
 
 for /f "usebackq delims=" %%L in ("%CU_TASK%") do (
     set "LINE=%%L"
@@ -213,13 +211,16 @@ for /f "usebackq delims=" %%L in ("%CU_TASK%") do (
         if !ERRORLEVEL! EQU 0 (
             echo [CU] OK
             set /a T_OK+=1
+        ) else if !ERRORLEVEL! EQU 124 (
+            echo [CU] TIMEOUT - killed after !CU_DEFAULT_TIMEOUT!s
+            set /a T_FAIL+=1
         ) else (
             echo [CU] FAIL
             set /a T_FAIL+=1
         )
     )
 )
-del "%CU_TEMP_TASK%" 2>nul
+del "!CU_TEMP_TASK!" 2>nul
 
 echo.
 echo [CU] ══════════════════════════════════════
@@ -310,7 +311,7 @@ echo [CU] ═══════════════════════�
 call :log "EXEC" "!CMD_TO_RUN!"
 
 set "CU_EXEC_CMD=!CMD_TO_RUN!"
-powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%CU_HELPER%" -Cmd $env:CU_EXEC_CMD -TimeoutSec %TIMEOUT_SEC% -WorkDir "%CU_DIR%"
+powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%CU_HELPER%" -Cmd "!CMD_TO_RUN!" -TimeoutSec %TIMEOUT_SEC% -WorkDir "%CU_DIR%"
 set "EXIT_CODE=%ERRORLEVEL%"
 
 echo.
@@ -529,7 +530,7 @@ echo $ErrorActionPreference = 'SilentlyContinue'
 echo try {
 echo     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
 echo     $pinfo.FileName = 'cmd.exe'
-echo     $pinfo.Arguments = '/c ' + $Cmd
+echo     if ^(Test-Path $Cmd^) { $pinfo.Arguments = '/c "' + $Cmd + '"' } else { $pinfo.Arguments = '/c ' + $Cmd }
 echo     $pinfo.UseShellExecute = $false
 echo     $pinfo.RedirectStandardOutput = $true
 echo     $pinfo.RedirectStandardError = $true
