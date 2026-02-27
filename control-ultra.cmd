@@ -526,38 +526,19 @@ exit /b 0
 :create_helper
 (
 echo param^([string]$Cmd, [int]$TimeoutSec = 120, [string]$WorkDir = "."^)
-echo $ErrorActionPreference = 'SilentlyContinue'
 echo try {
-echo     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-echo     $pinfo.FileName = 'cmd.exe'
-echo     if ^(Test-Path $Cmd^) { $pinfo.Arguments = '/c "' + $Cmd + '"' } else { $pinfo.Arguments = '/c ' + $Cmd }
-echo     $pinfo.UseShellExecute = $false
-echo     $pinfo.RedirectStandardOutput = $true
-echo     $pinfo.RedirectStandardError = $true
-echo     $pinfo.CreateNoWindow = $true
-echo     if ^(Test-Path $WorkDir^) { $pinfo.WorkingDirectory = $WorkDir }
-echo     $proc = [System.Diagnostics.Process]::Start^($pinfo^)
-echo     $stdoutTask = $proc.StandardOutput.ReadToEndAsync^(^)
-echo     $stderrTask = $proc.StandardError.ReadToEndAsync^(^)
-echo     $exited = $proc.WaitForExit^($TimeoutSec * 1000^)
-echo     if ^(-not $exited^) {
+echo     if ^($WorkDir -and ^(Test-Path $WorkDir^)^) { $WorkDir = ^(Resolve-Path $WorkDir^).Path } else { $WorkDir = ^(Get-Location^).Path }
+echo     $p = Start-Process cmd.exe -ArgumentList ^("/c " + $Cmd^) -WorkingDirectory $WorkDir -NoNewWindow -PassThru
+echo     if ^(-not $p.WaitForExit^($TimeoutSec * 1000^)^) {
 echo         try {
-echo             $children = Get-CimInstance Win32_Process ^| Where-Object { $_.ParentProcessId -eq $proc.Id }
+echo             $children = Get-CimInstance Win32_Process ^| Where-Object { $_.ParentProcessId -eq $p.Id }
 echo             foreach ^($c in $children^) { Stop-Process -Id $c.ProcessId -Force -ErrorAction SilentlyContinue }
-echo             Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+echo             Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
 echo         } catch {}
-echo         $out = if^($stdoutTask.IsCompleted^){$stdoutTask.Result}else{''}
-echo         if ^($out^) { Write-Host $out }
 echo         Write-Host '[CU] TIMEOUT: killed after' $TimeoutSec 'seconds' -ForegroundColor Yellow
 echo         exit 124
 echo     }
-echo     [void]$stdoutTask.Wait^(5000^)
-echo     [void]$stderrTask.Wait^(5000^)
-echo     $out = $stdoutTask.Result
-echo     $err = $stderrTask.Result
-echo     if ^($out^) { Write-Host $out }
-echo     if ^($err^) { Write-Host $err -ForegroundColor Red }
-echo     exit $proc.ExitCode
+echo     exit $p.ExitCode
 echo } catch {
 echo     Write-Host '[CU] ERROR:' $_.Exception.Message -ForegroundColor Red
 echo     exit 1
