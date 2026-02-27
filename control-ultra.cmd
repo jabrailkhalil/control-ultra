@@ -36,7 +36,7 @@ set "CU_DEFAULT_TIMEOUT=120"
 set "CU_HELPER=%CU_DIR%cu-exec-helper.ps1"
 
 if not exist "%CU_RESULTS%" mkdir "%CU_RESULTS%" 2>nul
-if not exist "%CU_HELPER%" call :create_helper
+call :create_helper
 if not exist "%CU_SHORTCUTS%" call :create_default_shortcuts
 if not exist "%CU_DIR%.agent\workflows\control-ultra.md" call :create_workflow
 
